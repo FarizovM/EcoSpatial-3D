@@ -29,13 +29,13 @@ services:
     networks:
       - eco_network
 
-  # PgAdmin для зручного перегляду геоданих (опціонально, але зручно)
+  # PgAdmin для перегляду геоданих
   pgadmin:
     image: dpage/pgadmin4
     container_name: ecospatial_pgadmin
     restart: always
     environment:
-      PGADMIN_DEFAULT_EMAIL: admin@eco.local
+      PGADMIN_DEFAULT_EMAIL: admin@ecospatial.com
       PGADMIN_DEFAULT_PASSWORD: admin
     ports:
       - "5050:80"
