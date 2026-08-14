@@ -239,6 +239,6 @@ VITE_MAPTILER_KEY=your_maptiler_api_key
 
 [![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
 
-Цей проект ліцензовано за умовами ліцензії **GNU General Public License v3.0**. Детальніше дивіться у файлі [LICENSE](LICENSE).
+Цей проект ліцензовано за умовами ліцензії **GNU General Public License v3.0**. Детальніше дивіться у файлі [LICENSE](LICENSE.md).
 
 Copyright © 2026 Farizov Maxim
