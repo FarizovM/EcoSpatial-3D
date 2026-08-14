@@ -10,7 +10,7 @@ import { useSensorStore, type MetricType, METRICS } from '../store/useSensorStor
 const INITIAL_VIEW_STATE: MapViewState = {
     longitude: 30.5234,
     latitude: 50.4501,
-    zoom: 11,
+    zoom: 11.5,
     pitch: 45,
     bearing: 0,
 };
@@ -151,7 +151,7 @@ export const Map3D = () => {
                                 source="maptiler-v3"
                                 source-layer="building" // Стандартна назва шару з будівлями в OSM
                                 type="fill-extrusion"
-                                minzoom={14} // Показувати тільки при наближенні
+                                minzoom={13} // Показувати тільки при наближенні
                                 paint={{
                                     // Колір будівель підлаштовується під темну/світлу тему
                                     'fill-extrusion-color': activeMapStyleType === 'dark' ? '#1e293b' : '#e2e8f0',
