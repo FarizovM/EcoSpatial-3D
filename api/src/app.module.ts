@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EventEmitterModule } from '@nestjs/event-emitter';
 import { CacheModule } from '@nestjs/cache-manager';
 import KeyvRedis from '@keyv/redis';
 
@@ -18,8 +19,9 @@ import { LiveDataModule } from './live-data/live-data.module';
       stores: [
         new KeyvRedis('redis://localhost:6379')
       ],
-      ttl: 600000, // Default Time-To-Live in milliseconds (e.g., 600 seconds)
+      ttl: 600000, // Time-To-Live in milliseconds (e.g., 600000 seconds)
     }),
+    EventEmitterModule.forRoot(),
     SensorsModule,
     ScheduleModule.forRoot(),
     GeneratorModule,
