@@ -1,9 +1,11 @@
 import { useEffect } from 'react';
 import axios from 'axios';
 import { useSensorStore } from './store/useSensorStore';
+import { Map3D } from './components/Map3D';
+import { ControlPanel } from './components/ControlPanel';
 
 export default function App() {
-  const { sensors, connectSocket, disconnectSocket, setSensors, latestMeasurements } = useSensorStore();
+  const { sensors, connectSocket, disconnectSocket, setSensors } = useSensorStore();
 
   useEffect(() => {
     // 1. Завантажуємо статичні дані датчиків (їх координати)
@@ -29,26 +31,31 @@ export default function App() {
   }, []);
 
   return (
-    <div className="h-screen w-screen flex flex-col bg-slate-900 text-white">
-      {/* Хедер дашборду */}
-      <header className="p-4 border-b border-slate-700 bg-slate-800 flex justify-between items-center z-10">
-        <h1 className="text-xl font-bold bg-linear-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-          EcoSpatial 3D
-        </h1>
-        <div className="flex gap-4 text-sm">
+    <div className="h-screen w-screen flex flex-col bg-slate-900 text-white overflow-hidden">
+      <header className="p-4 border-b border-slate-700 bg-slate-800 flex justify-between items-center z-10 shadow-lg">
+        <div>
+          <h1 className="text-2xl font-bold bg-linear-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
+            EcoSpatial 3D
+          </h1>
+          <p className="text-xs text-slate-400 mt-1">Real-time моніторинг якості повітря</p>
+        </div>
+        <div className="flex items-center gap-4 text-sm bg-slate-900 px-4 py-2 rounded-full border border-slate-700">
+          <div className="flex items-center gap-2">
+            <span className="relative flex h-3 w-3">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-3 w-3 bg-emerald-500"></span>
+            </span>
+            <span>Live Data</span>
+          </div>
+          <div className="w-px h-4 bg-slate-700"></div>
           <span>Активних датчиків: <strong className="text-emerald-400">{sensors.length}</strong></span>
         </div>
       </header>
 
-      {/* Контейнер для майбутньої 3D карти */}
       <main className="flex-1 relative">
-        <div className="absolute inset-0 flex items-center justify-center text-slate-500">
-          {/* Тимчасовий вивід даних для перевірки */}
-          <pre className="text-xs bg-slate-800 p-4 rounded-lg overflow-auto max-h-[80%] max-w-[80%]">
-            {JSON.stringify(latestMeasurements, null, 2)}
-          </pre>
-        </div>
+        <Map3D />
+        <ControlPanel />
       </main>
-    </div>
+    </div >
   );
 }

@@ -1,4 +1,3 @@
-// src/store/useSensorStore.ts
 import { create } from 'zustand';
 import { io, Socket } from 'socket.io-client';
 
@@ -21,22 +20,28 @@ export interface Measurement {
     humidity: number;
 }
 
+export type MetricType = 'pm2_5' | 'pm10' | 'co2' | 'temperature' | 'humidity';
 interface SensorState {
     sensors: Sensor[];
     // Зберігаємо останні показники як словник (Record) для швидкого доступу O(1)
     latestMeasurements: Record<string, Measurement>;
     socket: Socket | null;
+    activeMetric: MetricType;
 
     // Екшени
     setSensors: (sensors: Sensor[]) => void;
     connectSocket: () => void;
     disconnectSocket: () => void;
+    setActiveMetric: (metric: MetricType) => void;
 }
+
+
 
 export const useSensorStore = create<SensorState>((set, get) => ({
     sensors: [],
     latestMeasurements: {},
     socket: null,
+    activeMetric: 'pm2_5',
 
     setSensors: (sensors) => set({ sensors }),
 
@@ -72,4 +77,6 @@ export const useSensorStore = create<SensorState>((set, get) => ({
             set({ socket: null });
         }
     },
+
+    setActiveMetric: (metric) => set({ activeMetric: metric }),
 }));
