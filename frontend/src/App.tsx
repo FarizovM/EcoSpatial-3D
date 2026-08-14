@@ -7,13 +7,14 @@ import { LayerSwitcher } from './components/LayerSwitcher';
 
 export default function App() {
   const { sensors, connectSocket, disconnectSocket, setSensors } = useSensorStore();
+  const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
     // 1. Завантажуємо статичні дані датчиків (їх координати)
     const fetchSensors = async () => {
       try {
         // Щоб це працювало, нам потрібно буде додати простий GET метод в SensorsController на бекенді
-        const response = await axios.get('http://localhost:3000/sensors');
+        const response = await axios.get(`${API_URL}/sensors`);
         setSensors(response.data);
       } catch (error) {
         console.error('Помилка завантаження датчиків:', error);
