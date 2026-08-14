@@ -237,8 +237,12 @@ VITE_MAPTILER_KEY=your_maptiler_api_key
 
 ## 📄 Ліцензія
 
-[![License: GPL v3](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0)
+[![License: PolyForm Noncommercial 1.0.0](https://img.shields.io/badge/License-PolyForm%20Noncommercial-blue.svg)](https://polyformproject.org/licenses/noncommercial/1.0.0)
 
-Цей проект ліцензовано за умовами ліцензії **GNU General Public License v3.0**. Детальніше дивіться у файлі [LICENSE](LICENSE.md).
+Цей проект ліцензовано за умовами ліцензії **PolyForm Noncommercial 1.0.0**. 
+
+Ви можете вільно використовувати, змінювати та поширювати цей продукт у **некомерційних** цілях (наприклад, для навчання, досліджень або власних потреб). **Комерційне використання заборонено**. Детальніше дивіться у файлі [LICENSE](LICENSE.md).
+
+Для комерційного використання зв'яжіться з автором.
 
 Copyright © 2026 Farizov Maxim
