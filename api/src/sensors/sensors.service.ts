@@ -58,4 +58,21 @@ export class SensorsService {
         return sensors;
     }
 
+
+    // 3. Отримуємо всі датчики без фільтрації
+    async findAll() {
+        const sensors: object[] = await this.prisma.$queryRaw`
+        SELECT 
+            sensor_id as "sensorId",
+            name,
+            description,
+            is_active as "isActive",
+            ST_X(geom) as lng,
+            ST_Y(geom) as lat
+        FROM sensors
+        WHERE is_active;
+    `;
+
+        return sensors;
+    }
 }
