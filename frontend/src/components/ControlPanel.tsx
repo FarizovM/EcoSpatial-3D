@@ -1,12 +1,6 @@
-import { useSensorStore, type MetricType } from '../store/useSensorStore';
+import { useSensorStore, METRICS } from '../store/useSensorStore';
 
-const METRICS: { key: MetricType; label: string; unit: string }[] = [
-    { key: 'pm2_5', label: 'PM 2.5', unit: 'µg/m³' },
-    { key: 'pm10', label: 'PM 10', unit: 'µg/m³' },
-    { key: 'co2', label: 'Рівень CO2', unit: 'ppm' },
-    { key: 'temperature', label: 'Температура', unit: '°C' },
-    { key: 'humidity', label: 'Вологість', unit: '%' },
-];
+
 
 export const ControlPanel = () => {
     const { activeMetric, setActiveMetric } = useSensorStore();
@@ -44,7 +38,7 @@ export const ControlPanel = () => {
                     <span>Увага</span>
                     <span>Небезпечно</span>
                 </div>
-                <div className="h-1.5 w-full rounded-full mt-1 bg-gradient-to-r from-green-500 via-yellow-500 to-red-500"></div>
+                <div className="h-1.5 w-full rounded-full mt-1 bg-linear-to-r from-green-500 via-yellow-500 to-red-500"></div>
             </div>
         </div>
     );

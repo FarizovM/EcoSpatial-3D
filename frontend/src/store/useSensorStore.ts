@@ -21,27 +21,41 @@ export interface Measurement {
 }
 
 export type MetricType = 'pm2_5' | 'pm10' | 'co2' | 'temperature' | 'humidity';
+export type MapStyleType = 'dark' | 'light' | 'satellite';
+
 interface SensorState {
     sensors: Sensor[];
     // Зберігаємо останні показники як словник (Record) для швидкого доступу O(1)
     latestMeasurements: Record<string, Measurement>;
     socket: Socket | null;
     activeMetric: MetricType;
+    activeMapStyleType: MapStyleType;
+    show3DBuildings: boolean;
 
     // Екшени
     setSensors: (sensors: Sensor[]) => void;
     connectSocket: () => void;
     disconnectSocket: () => void;
     setActiveMetric: (metric: MetricType) => void;
+    setActiveMapStyleType: (styleType: MapStyleType) => void;
+    toggle3DBuildings: () => void;
 }
 
-
+export const METRICS: { key: MetricType; label: string; unit: string }[] = [
+    { key: 'pm2_5', label: 'Рівень PM2.5', unit: 'µg/m³' },
+    { key: 'pm10', label: 'Рівень PM10', unit: 'µg/m³' },
+    { key: 'co2', label: 'CO2', unit: 'ppm' },
+    { key: 'temperature', label: 'Температура', unit: '°C' },
+    { key: 'humidity', label: 'Вологість', unit: '%' }
+];
 
 export const useSensorStore = create<SensorState>((set, get) => ({
     sensors: [],
     latestMeasurements: {},
     socket: null,
     activeMetric: 'pm2_5',
+    activeMapStyleType: 'dark',
+    show3DBuildings: false,
 
     setSensors: (sensors) => set({ sensors }),
 
@@ -79,4 +93,6 @@ export const useSensorStore = create<SensorState>((set, get) => ({
     },
 
     setActiveMetric: (metric) => set({ activeMetric: metric }),
+    setActiveMapStyleType: (styleType) => set({ activeMapStyleType: styleType }),
+    toggle3DBuildings: () => set((state) => ({ show3DBuildings: !state.show3DBuildings })),
 }));

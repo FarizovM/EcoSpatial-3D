@@ -2,9 +2,9 @@ import { useMemo } from 'react';
 import DeckGL from '@deck.gl/react';
 import { ColumnLayer } from '@deck.gl/layers';
 import type { MapViewState } from '@deck.gl/core';
-import Map from 'react-map-gl/maplibre';
+import Map, { Source, Layer } from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css'; // стилі для карти
-import { useSensorStore, type MetricType } from '../store/useSensorStore';
+import { useSensorStore, type MetricType, METRICS } from '../store/useSensorStore';
 
 // Початкова позиція камери (центр Києва, нахил 45 градусів для 3D ефекту)
 const INITIAL_VIEW_STATE: MapViewState = {
@@ -31,34 +31,27 @@ const COLORS: [number, number, number, number][] = [
     [239, 68, 68, 255]
 ];
 
-const MAP_STYLE = {
-    version: 8,
-    sources: {
-        'carto-dark': {
-            type: 'raster',
-            tiles: [
-                'https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-                'https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-                'https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-                'https://d.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png',
-            ],
-            tileSize: 256,
-            attribution: '&copy; <a href="https://carto.com/">CARTO</a>'
-        },
+const MAP_STYLES = {
+    dark: {
+        version: 8,
+        sources: { 'carto-dark': { type: 'raster', tiles: ['https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png'], tileSize: 256 } },
+        layers: [{ id: 'carto-dark-layer', type: 'raster', source: 'carto-dark', minzoom: 0, maxzoom: 22 }]
     },
-    layers: [
-        {
-            id: 'carto-dark-layer',
-            type: 'raster',
-            source: 'carto-dark',
-            minzoom: 0,
-            maxzoom: 22,
-        },
-    ],
+    light: {
+        version: 8,
+        sources: { 'carto-light': { type: 'raster', tiles: ['https://a.basemaps.cartocdn.com/light_all/{z}/{x}/{y}@2x.png'], tileSize: 256 } },
+        layers: [{ id: 'carto-light-layer', type: 'raster', source: 'carto-light', minzoom: 0, maxzoom: 22 }]
+    },
+    satellite: {
+        version: 8,
+        sources: { 'esri-sat': { type: 'raster', tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'], tileSize: 256 } },
+        layers: [{ id: 'esri-sat-layer', type: 'raster', source: 'esri-sat', minzoom: 0, maxzoom: 22 }]
+    }
 };
 
+
 export const Map3D = () => {
-    const { sensors, latestMeasurements, activeMetric } = useSensorStore();
+    const { sensors, latestMeasurements, activeMetric, activeMapStyleType, show3DBuildings } = useSensorStore();
 
     // Об'єднуємо статичні датчики з останніми показниками для рендеру
     const data = useMemo(() => {
@@ -82,7 +75,7 @@ export const Map3D = () => {
         id: `sensors-column-layer-${activeMetric as MetricType}`,
         data,
         diskResolution: 12, // Кількість граней (12 = циліндр, 6 = гексагон)
-        radius: 200,        // Радіус стовпця в метрах
+        radius: 150,        // Радіус стовпця в метрах
         extruded: true,     // Вмикаємо 3D витягування
         pickable: true,     // Дозволяємо наведення мишкою для тултипів
         elevationScale: config.scale, // Масштаб висоти (щоб стовпці були помітними)
@@ -123,21 +116,13 @@ export const Map3D = () => {
                             <br/>
                             <span style="color: #94a3b8; font-size: 12px;">${object.description}</span>
                             <br/><br/>
-                            <div style="display: flex; justify-content: space-between; gap: 12px;">
-                            <span>PM2.5:</span> <strong style="color: ${activeMetric === 'pm2_5' ? '#38bdf8' : '#fff'}">${object.pm2_5}</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; gap: 12px;">
-                            <span>PM10:</span> <strong style="color: ${activeMetric === 'pm10' ? '#38bdf8' : '#fff'}">${object.pm10}</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; gap: 12px;">
-                            <span>CO2:</span> <strong style="color: ${activeMetric === 'co2' ? '#38bdf8' : '#fff'}">${object.co2}</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; gap: 12px;">
-                            <span>Температура:</span> <strong style="color: ${activeMetric === 'temperature' ? '#38bdf8' : '#fff'}">${object.temperature}°C</strong>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; gap: 12px;">
-                            <span>Вологість:</span> <strong style="color: ${activeMetric === 'humidity' ? '#38bdf8' : '#fff'}">${object.humidity}%</strong>
-                            </div>
+
+                            ${METRICS.map((el) => (
+                            `<div style="display: flex; justify-content: space-between; gap: 12px;">
+                                    <span>${el.label}:</span> <strong style="color: ${activeMetric === el.key ? '#38bdf8' : '#fff'}">${object[el.key]}</strong>
+                                </div>`
+                        )
+                        ).join('')}
                         </div>
                         `,
                         style: {
@@ -151,7 +136,34 @@ export const Map3D = () => {
                 }
             >
                 {/* Темна тема CartoDB (безкоштовна, не потребує токена) */}
-                <Map mapStyle={MAP_STYLE as any} />
+                <Map mapStyle={MAP_STYLES[activeMapStyleType] as any}>
+
+                    {show3DBuildings && (
+                        <Source
+                            id="maptiler-v3"
+                            type="vector"
+                            // УВАГА: Для 3D будівель потрібні Векторні Тайли. 
+                            // Отримай безкоштовний ключ на maptiler.com і встав замість YOUR_MAPTILER_KEY
+                            url={`https://api.maptiler.com/tiles/v3/tiles.json?key=${import.meta.env.VITE_MAPTILER_KEY || 'YOUR_MAPTILER_KEY'}`}
+                        >
+                            <Layer
+                                id="3d-buildings"
+                                source="maptiler-v3"
+                                source-layer="building" // Стандартна назва шару з будівлями в OSM
+                                type="fill-extrusion"
+                                minzoom={14} // Показувати тільки при наближенні
+                                paint={{
+                                    // Колір будівель підлаштовується під темну/світлу тему
+                                    'fill-extrusion-color': activeMapStyleType === 'dark' ? '#1e293b' : '#e2e8f0',
+                                    'fill-extrusion-height': ['get', 'render_height'],
+                                    'fill-extrusion-base': ['get', 'render_min_height'],
+                                    'fill-extrusion-opacity': 0.7,
+                                }}
+                            />
+                        </Source>
+                    )}
+
+                </Map>
             </DeckGL>
         </div>
     );

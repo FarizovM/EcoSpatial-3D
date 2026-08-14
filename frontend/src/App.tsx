@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useSensorStore } from './store/useSensorStore';
 import { Map3D } from './components/Map3D';
 import { ControlPanel } from './components/ControlPanel';
+import { LayerSwitcher } from './components/LayerSwitcher';
 
 export default function App() {
   const { sensors, connectSocket, disconnectSocket, setSensors } = useSensorStore();
@@ -54,6 +55,7 @@ export default function App() {
 
       <main className="flex-1 relative">
         <Map3D />
+        <LayerSwitcher />
         <ControlPanel />
       </main>
     </div >
