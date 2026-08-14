@@ -1,4 +1,6 @@
 import { Controller, Post, Body, Get, Query, ParseFloatPipe, ParseIntPipe } from '@nestjs/common';
+import { CacheKey, CacheTTL } from '@nestjs/cache-manager';
+
 import { SensorsService } from './sensors.service';
 import { CreateSensorDto } from './dto/create-sensor.dto';
 
@@ -25,6 +27,7 @@ export class SensorsController {
 
     // Get http://localhost:3000/sensors
     @Get()
+    @CacheKey('find_all_sensors')
     async findAll() {
         return this.sensorsService.findAll();
     }
