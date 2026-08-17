@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useCallback } from 'react';
 import DeckGL from '@deck.gl/react';
 import { ColumnLayer, PolygonLayer } from '@deck.gl/layers';
 import { MVTLayer } from '@deck.gl/geo-layers';
@@ -72,6 +72,53 @@ function hexToRgb(hex: string): [number, number, number] {
     return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
 }
 
+// ===================== Compass =====================
+const MapCompass = ({ bearing, onResetNorth }: { bearing: number; onResetNorth: () => void }) => (
+    <button
+        id="map-compass-btn"
+        title="Скинути північ"
+        onClick={onResetNorth}
+        style={{
+            position: 'absolute',
+            bottom: '120px',
+            right: '16px',
+            zIndex: 10,
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            border: '1px solid rgba(255,255,255,0.15)',
+            background: 'rgba(15, 23, 42, 0.75)',
+            backdropFilter: 'blur(12px)',
+            boxShadow: '0 4px 24px rgba(0,0,0,0.4)',
+            cursor: 'pointer',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            padding: 0,
+            transition: 'box-shadow 0.2s, background 0.2s',
+        }}
+        onMouseEnter={e => (e.currentTarget.style.background = 'rgba(30, 41, 59, 0.92)')}
+        onMouseLeave={e => (e.currentTarget.style.background = 'rgba(15, 23, 42, 0.75)')}
+    >
+        <svg
+            width="32"
+            height="32"
+            viewBox="0 0 32 32"
+            style={{ transform: `rotate(${-bearing}deg)`, transition: 'transform 0.3s ease' }}
+        >
+            {/* North needle — red */}
+            <polygon points="16,4 13,16 16,14 19,16" fill="#ef4444" opacity="0.95" />
+            {/* South needle — light */}
+            <polygon points="16,28 13,16 16,18 19,16" fill="#94a3b8" opacity="0.7" />
+            {/* Center dot */}
+            <circle cx="16" cy="16" r="2.2" fill="#f1f5f9" />
+            {/* N label */}
+            <text x="16" y="3" textAnchor="middle" fontSize="5" fontWeight="bold" fill="#ef4444" fontFamily="sans-serif">N</text>
+        </svg>
+    </button>
+);
+// ====================================================
+
 export const Map3D = () => {
     const {
         sensors,
@@ -82,6 +129,19 @@ export const Map3D = () => {
         zones,
         showZones,
     } = useSensorStore();
+
+    const [bearing, setBearing] = useState(INITIAL_VIEW_STATE.bearing ?? 0);
+    const [viewState, setViewState] = useState<any>(INITIAL_VIEW_STATE);
+
+    const handleViewStateChange = useCallback(({ viewState: vs }: any) => {
+        setViewState(vs);
+        setBearing(vs.bearing ?? 0);
+    }, []);
+
+    const handleResetNorth = useCallback(() => {
+        setViewState((prev: any) => ({ ...prev, bearing: 0, transitionDuration: 500 }));
+        setBearing(0);
+    }, []);
 
     // Об'єднуємо датчики з останніми показниками
     const data = useMemo(() => {
@@ -222,7 +282,6 @@ export const Map3D = () => {
     }), [data, activeMetric, config]);
 
     // Зони (райони)
-
     const zonesLayer = useMemo(() => {
         if (!showZones) return null;
 
@@ -255,7 +314,6 @@ export const Map3D = () => {
 
     }, [showZones, zonesData, activeMetric, config]);
 
-
     const layers = useMemo(
         () => [buildingsLayer, sensorsLayer, zonesLayer].filter(Boolean) as any[],
         [buildingsLayer, sensorsLayer, zonesLayer],
@@ -263,8 +321,10 @@ export const Map3D = () => {
 
     return (
         <div className="absolute inset-0">
+            <MapCompass bearing={bearing} onResetNorth={handleResetNorth} />
             <DeckGL
-                initialViewState={INITIAL_VIEW_STATE}
+                viewState={viewState}
+                onViewStateChange={handleViewStateChange}
                 controller={true}
                 layers={layers}
                 getTooltip={({ object }: any) =>
