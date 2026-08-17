@@ -11,7 +11,7 @@ import { useSensorStore, type MetricType, METRICS } from '../store/useSensorStor
 const INITIAL_VIEW_STATE: MapViewState = {
     longitude: 30.5234,
     latitude: 50.4501,
-    zoom: 14,      // zoom 14 щоб будівлі одразу були видні
+    zoom: 11.5,      // zoom 14 щоб будівлі одразу були видні
     pitch: 45,
     bearing: 0,
 };
