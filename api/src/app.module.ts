@@ -10,6 +10,7 @@ import { PrismaModule } from './prisma/prisma.module';
 import { SensorsModule } from './sensors/sensors.module';
 import { GeneratorModule } from './generator/generator.module';
 import { LiveDataModule } from './live-data/live-data.module';
+import { ZonesModule } from './zones/zones.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { LiveDataModule } from './live-data/live-data.module';
     ScheduleModule.forRoot(),
     GeneratorModule,
     LiveDataModule,
+    ZonesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
