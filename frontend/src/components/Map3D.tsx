@@ -111,8 +111,9 @@ export const Map3D = () => {
                 return { [m.key]: avg };
             }));
 
-            // Extract outer ring coords from GeoJSON and convert hex color to [R,G,B]
-            const geomCoords = (zone.geom as object)?.coordinates?.[0] ?? [];
+            // Extract outer ring coords from GeoJSON
+            const geomCoords = (zone.geom as { coordinates?: number[][][] })?.coordinates?.[0] ?? [];
+            // convert hex color to [R,G,B]
             const rgb = hexToRgb((zone.color_hex as string) ?? '#888888');
 
             return {
