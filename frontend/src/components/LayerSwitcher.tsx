@@ -4,7 +4,14 @@ import {
 } from "../store/useSensorStore"
 
 export const LayerSwitcher = () => {
-    const { activeMapStyleType, setActiveMapStyleType, toggle3DBuildings, show3DBuildings } = useSensorStore();
+    const {
+        activeMapStyleType,
+        setActiveMapStyleType,
+        show3DBuildings,
+        toggle3DBuildings,
+        showZones,
+        toggleZones
+    } = useSensorStore();
 
     const mapTypes: { id: MapStyleType, label: string, img: string }[] = [
         { id: "dark", label: "Ніч", img: "https://a.basemaps.cartocdn.com/dark_all/13/4788/2762@2x.png" },
@@ -48,6 +55,23 @@ export const LayerSwitcher = () => {
                     />
                     <div className={`block w-8 h-4 rounded-full transition-colors ${show3DBuildings ? 'bg-emerald-500' : 'bg-slate-600'}`}></div>
                     <div className={`dot absolute left-1 top-1 bg-white w-2 h-2 rounded-full transition-transform ${show3DBuildings ? 'transform translate-x-4' : ''}`}></div>
+                </div>
+            </label>
+
+            {/* Тогл шар аналитики по зонах (районах)*/}
+            <label className="flex items-center justify-between px-2 py-1 cursor-pointer group">
+                <span className="text-xs text-slate-400 group-hover:text-slate-300 transition-colors">
+                    Зони (райони)
+                </span>
+                <div className="relative">
+                    <input
+                        type="checkbox"
+                        className="sr-only"
+                        checked={showZones}
+                        onChange={toggleZones}
+                    />
+                    <div className={`block w-8 h-4 rounded-full transition-colors ${showZones ? 'bg-emerald-500' : 'bg-slate-600'}`}></div>
+                    <div className={`dot absolute left-1 top-1 bg-white w-2 h-2 rounded-full transition-transform ${showZones ? 'transform translate-x-4' : ''}`}></div>
                 </div>
             </label>
 

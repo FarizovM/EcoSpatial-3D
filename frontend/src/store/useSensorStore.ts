@@ -20,6 +20,13 @@ export interface Measurement {
     humidity: number;
 }
 
+export interface Zone {
+    name: string;
+    color_hex: string;
+    geom: object;
+    sensor_ids?: string[];
+}
+
 export type MetricType = 'pm2_5' | 'pm10' | 'co2' | 'temperature' | 'humidity';
 export type MapStyleType = 'dark' | 'light' | 'satellite';
 
@@ -31,14 +38,19 @@ interface SensorState {
     activeMetric: MetricType;
     activeMapStyleType: MapStyleType;
     show3DBuildings: boolean;
+    zones: Zone[];
+    showZones: boolean;
+
 
     // Екшени
     setSensors: (sensors: Sensor[]) => void;
+    setZones: (zones: Zone[]) => void;
     connectSocket: () => void;
     disconnectSocket: () => void;
     setActiveMetric: (metric: MetricType) => void;
     setActiveMapStyleType: (styleType: MapStyleType) => void;
     toggle3DBuildings: () => void;
+    toggleZones: () => void;
 }
 
 export const METRICS: { key: MetricType; label: string; unit: string }[] = [
@@ -56,8 +68,12 @@ export const useSensorStore = create<SensorState>((set, get) => ({
     activeMetric: 'pm2_5',
     activeMapStyleType: 'dark',
     show3DBuildings: false,
+    zones: [],
+    showZones: false,
 
+    // Екшени
     setSensors: (sensors) => set({ sensors }),
+    setZones: (zones) => set({ zones }),
 
     connectSocket: () => {
         // Уникаємо дублювання підключень
@@ -95,4 +111,5 @@ export const useSensorStore = create<SensorState>((set, get) => ({
     setActiveMetric: (metric) => set({ activeMetric: metric }),
     setActiveMapStyleType: (styleType) => set({ activeMapStyleType: styleType }),
     toggle3DBuildings: () => set((state) => ({ show3DBuildings: !state.show3DBuildings })),
+    toggleZones: () => set((state) => ({ showZones: !state.showZones })),
 }));

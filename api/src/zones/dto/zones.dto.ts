@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsObject, IsString } from "class-validator"
+import { IsNotEmpty, IsNumber, IsObject, IsString, IsArray, IsOptional, } from "class-validator"
 
 
 export class ZonesAnalyticsDto {
@@ -32,4 +32,26 @@ export class ZonesAnalyticsDto {
     @IsNumber()
     @IsNotEmpty()
     avg_humidity: number;
+}
+
+export class ZoneSensorIdsDto {
+    @IsString()
+    @IsNotEmpty()
+    monitoring_zone_id: string;
+
+    @IsString()
+    @IsNotEmpty()
+    name: string;
+
+    @IsString()
+    @IsNotEmpty()
+    color_hex: string;
+
+    @IsObject()
+    @IsNotEmpty()
+    geom: object;
+
+    @IsArray()
+    @IsOptional()
+    sensor_ids?: string[];
 }

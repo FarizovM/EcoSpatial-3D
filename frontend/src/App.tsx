@@ -6,22 +6,42 @@ import { ControlPanel } from './components/ControlPanel';
 import { LayerSwitcher } from './components/LayerSwitcher';
 
 export default function App() {
-  const { sensors, connectSocket, disconnectSocket, setSensors } = useSensorStore();
+  const {
+    connectSocket,
+    disconnectSocket,
+    sensors,
+    setSensors,
+    zones,
+    showZones,
+    setZones
+  } = useSensorStore();
   const API_URL = import.meta.env.VITE_API_URL;
 
   useEffect(() => {
+
     // 1. Завантажуємо статичні дані датчиків (їх координати)
     const fetchSensors = async () => {
       try {
-        // Щоб це працювало, нам потрібно буде додати простий GET метод в SensorsController на бекенді
+
         const response = await axios.get(`${API_URL}/sensors`);
         setSensors(response.data);
+
       } catch (error) {
         console.error('Помилка завантаження датчиків:', error);
       }
     };
 
+    const fetchZones = async () => {
+      try {
+        const response = await axios.get(`${API_URL}/zones`);
+        setZones(response.data);
+      } catch (error) {
+        console.error('Помилка завантаження зон:', error);
+      }
+    };
+
     fetchSensors();
+    fetchZones();
 
     // 2. Підключаємо WebSockets для отримання стріму даних
     connectSocket();
@@ -51,6 +71,12 @@ export default function App() {
           </div>
           <div className="w-px h-4 bg-slate-700"></div>
           <span>Активних датчиків: <strong className="text-emerald-400">{sensors.length}</strong></span>
+          {showZones && (
+            <>
+              <div className="w-px h-4 bg-slate-700"></div>
+              <span>Районів: <strong className="text-emerald-400">{zones.length}</strong></span>
+            </>
+          )}
         </div>
       </header>
 

@@ -5,7 +5,7 @@ import { MVTLayer } from '@deck.gl/geo-layers';
 import type { MapViewState } from '@deck.gl/core';
 import Map from 'react-map-gl/maplibre';
 import 'maplibre-gl/dist/maplibre-gl.css';
-import { useSensorStore, type MetricType, METRICS } from '../store/useSensorStore';
+import { useSensorStore, type MetricType, METRICS, type Zone } from '../store/useSensorStore';
 
 // Початкова позиція камери (центр Києва, нахил 45° для 3D ефекту)
 const INITIAL_VIEW_STATE: MapViewState = {
@@ -25,8 +25,10 @@ const METRIC_CONFIG: { [key in MetricType]: { scale: number; thresholds: [number
     humidity: { scale: 50, thresholds: [50, 70], unit: '%' },
 };
 
+type rgb = [number, number, number, number]
+
 // RGB кольори: [Зелений, Жовтий, Червоний]
-const COLORS: [number, number, number, number][] = [
+const COLORS: rgb[] = [
     [34, 197, 94, 255],
     [234, 179, 8, 255],
     [239, 68, 68, 255],
@@ -60,8 +62,26 @@ const BUILDING_COLORS: Record<string, [number, number, number, number]> = {
     satellite: [60, 70, 90, 200],
 };
 
+/** Convert '#rrggbb' or '#rgb' hex string to [R, G, B] tuple for deck.gl */
+function hexToRgb(hex: string): [number, number, number] {
+    const clean = hex.replace('#', '');
+    const full = clean.length === 3
+        ? clean.split('').map(c => c + c).join('')
+        : clean;
+    const num = parseInt(full, 16);
+    return [(num >> 16) & 255, (num >> 8) & 255, num & 255];
+}
+
 export const Map3D = () => {
-    const { sensors, latestMeasurements, activeMetric, activeMapStyleType, show3DBuildings } = useSensorStore();
+    const {
+        sensors,
+        latestMeasurements,
+        activeMetric,
+        activeMapStyleType,
+        show3DBuildings,
+        zones,
+        showZones,
+    } = useSensorStore();
 
     // Об'єднуємо датчики з останніми показниками
     const data = useMemo(() => {
@@ -77,6 +97,34 @@ export const Map3D = () => {
             };
         });
     }, [sensors, latestMeasurements]);
+
+    const zonesData = useMemo(() => {
+        return zones.map((zone: Zone) => {
+            const zoneData = data.filter(el => zone?.sensor_ids?.find(id => id === el.sensorId));
+
+            // Merge array of {key: value} objects into a single flat object
+            const avgZoneData = Object.assign({}, ...METRICS.map((m) => {
+                const metricData = zoneData.map(el => el[m.key as MetricType]);
+                const avg = metricData.length > 0
+                    ? metricData.reduce((acc, item) => acc + item, 0) / metricData.length
+                    : 0;
+                return { [m.key]: avg };
+            }));
+
+            // Extract outer ring coords from GeoJSON and convert hex color to [R,G,B]
+            const geomCoords = (zone.geom as object)?.coordinates?.[0] ?? [];
+            const rgb = hexToRgb((zone.color_hex as string) ?? '#888888');
+
+            return {
+                ...zone,
+                ...avgZoneData,
+                geomCoords,
+                rgb,
+            };
+        });
+
+    }, [zones, data]);
+
 
     const config = METRIC_CONFIG[activeMetric as MetricType];
 
@@ -172,9 +220,40 @@ export const Map3D = () => {
         },
     }), [data, activeMetric, config]);
 
+    // Зони (райони)
+
+    const zonesLayer = useMemo(() => {
+        if (!showZones) return null;
+
+        return new PolygonLayer({
+            id: 'zones-layer',
+            data: zonesData,
+            extruded: true,
+            wireframe: false,
+            filled: true,
+            stroked: false,
+            // geomCoords — outer ring [[lng,lat], ...] extracted from GeoJSON
+            getPolygon: (d: any) => d.geomCoords,
+            getElevation: (d: any) => (d[activeMetric as MetricType] ?? 0) * config.scale,
+            getFillColor: (d: any) => [...d.rgb, 180] as rgb,
+            material: {
+                ambient: 0.4,
+                diffuse: 0.6,
+                shininess: 24,
+                specularColor: [80, 90, 110],
+            },
+            updateTriggers: {
+                getElevation: activeMetric,
+                getFillColor: activeMetric,
+            },
+        });
+
+    }, [showZones, zonesData, activeMetric, config]);
+
+
     const layers = useMemo(
-        () => [buildingsLayer, sensorsLayer].filter(Boolean) as any[],
-        [buildingsLayer, sensorsLayer],
+        () => [buildingsLayer, sensorsLayer, zonesLayer].filter(Boolean) as any[],
+        [buildingsLayer, sensorsLayer, zonesLayer],
     );
 
     return (
