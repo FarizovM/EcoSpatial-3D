@@ -23,6 +23,7 @@ model Sensor {
 
   // Додаємо просторовий індекс (GiST)
   @@index([geom], name: "idx_sensors_geom", type: Gist)
+  @@index([is_active], name: "idx_sensors_is_active", type: BTree)
   @@map("sensors")
 }
 
@@ -43,4 +44,15 @@ model AirQualityMeasurement {
   // Композитний індекс
   @@index([sensor_id, created_at], name: "idx_measurements_sensor_time")
   @@map("air_quality_measurements")
+}
+
+model MonitoringZones {
+  monitoring_zone_id String                                      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name               String                                      @db.VarChar(255)
+  color_hex          String                                      @db.Text
+  geom               Unsupported("geometry(MultiPolygon, 4326)")
+
+  @@unique([name])
+  @@index([geom], name: "idx_monitoring_zones_geom", type: Gist)
+  @@map("monitoring_zones")
 }
