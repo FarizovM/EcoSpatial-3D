@@ -246,6 +246,10 @@ export const Map3D = () => {
                 getElevation: activeMetric,
                 getFillColor: activeMetric,
             },
+            transitions: {
+                getElevation: 1000,
+                getFillColor: 1000,
+            },
         });
 
     }, [showZones, zonesData, activeMetric, config]);
